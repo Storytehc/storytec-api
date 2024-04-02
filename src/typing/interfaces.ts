@@ -5,4 +5,5 @@ export interface HTTPError {
   statusCode?: HttpStatus;
   timestamp?: Date | string;
   path?: string;
+  request_type?: string;
 }
