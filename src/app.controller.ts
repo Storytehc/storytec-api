@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService, AssetService } from './app.service';
-import { AssetData } from './typing/validators';
+import { AssetData, UriGeneratorParams } from './typing/validators';
 
 @Controller()
 export class AppController {
@@ -28,6 +28,8 @@ export class AssetController {
     return await this.assetService.uploadAsset(assetData);
   }
 
-  // @Post()
-  // mintAsset() {}
+  @Post('create-token')
+  createToken(@Body() uriGenerator: UriGeneratorParams) {
+    return this.assetService.createToken(uriGenerator);
+  }
 }

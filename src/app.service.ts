@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { uploadFileToCloudinary } from './storage/cloudinary';
+import { UriGeneratorParams } from './typing/validators';
+import { createNewTokenOnBlockchain } from './web3/scripts/newToken';
+// import { showExplorerUrl } from './web3/lib/helpers';
+// import { createTokenOnBlockchain } from './web3/scripts/createToken';
+import { showExplorerUrl } from './web3/lib/helpers';
 // import { BadRequest } from './exceptions/custom/BadRequest';
 
 @Injectable()
@@ -29,5 +34,12 @@ export class AssetService {
     return response;
   }
 
-  mintAsset() {}
+  async createToken(uriGenerator: UriGeneratorParams) {
+    console.log(uriGenerator);
+    const response = await createNewTokenOnBlockchain(uriGenerator);
+    return {
+      ...response,
+      explorerUrl: showExplorerUrl({ address: response.token })
+    };
+  }
 }

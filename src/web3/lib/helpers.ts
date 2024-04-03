@@ -1,14 +1,8 @@
-import {
-  Connection,
-  Keypair,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  TransactionInstruction,
-  TransactionMessage,
-  VersionedTransaction
-} from '@solana/web3.js';
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import * as path from 'path';
 import * as fs from 'fs';
+import { umi } from './variables';
+import { Keypair } from '@metaplex-foundation/umi';
 
 // constant declarations
 const RELATIVE_DIR_PATH = path.relative(
@@ -72,7 +66,7 @@ export const loadKeypairFromFile = (searchPath: string) => {
     const keypairBytes = JSON.parse(
       fs.readFileSync(searchPath, { encoding: 'utf-8' })
     );
-    return Keypair.fromSecretKey(new Uint8Array(keypairBytes));
+    return umi.eddsa.createKeypairFromSecretKey(new Uint8Array(keypairBytes));
   } catch (err: unknown) {
     throw new Error(`Could not load key from file: ${err}`);
   }
@@ -85,7 +79,7 @@ export const loadKeypairOrGenerate = (
   try {
     // load or generate the keypair
     const searchPath = path.join(dirPath, `${fileName}.json`);
-    let keypair = Keypair.generate();
+    let keypair = umi.eddsa.generateKeypair();
 
     // check if the file exists
     if (fs.existsSync(searchPath)) {
@@ -101,35 +95,36 @@ export const loadKeypairOrGenerate = (
   }
 };
 
-interface BuildTransaction {
-  payerKey: PublicKey;
-  instructions: TransactionInstruction[];
-  connection: Connection;
-  signers: Keypair[];
-}
+// export const buildTransaction = async (params: BuildTransaction) => {
+//   const { payerKey, instructions, connection, signers } = params;
 
-export const buildTransaction = async (params: BuildTransaction) => {
-  const { payerKey, instructions, connection, signers } = params;
+//   // get most recent block hash
+//   const { blockhash } = await connection.getLatestBlockhash();
 
-  // get most recent block hash
-  const { blockhash } = await connection.getLatestBlockhash();
+//   console.log('Got here', payerKey.toBase58());
 
-  // generate a transaction message
-  const message = new TransactionMessage({
-    payerKey,
-    instructions,
-    recentBlockhash: blockhash
-  }).compileToV0Message();
+//   // generate a transaction message
+//   const txMessage = new TransactionMessage({
+//     payerKey,
+//     instructions,
+//     recentBlockhash: blockhash
+//   });
 
-  // create a new versioned transaction
-  const tx = new VersionedTransaction(message);
-  console.log('Transaction Created..');
+//   console.log(txMessage);
 
-  // sign the transaction for all signers
-  signers.forEach((signer) => tx.sign([signer]));
+//   const message = txMessage.compileToV0Message();
 
-  return tx;
-};
+//   console.log('another milestorne');
+
+//   // create a new versioned transaction
+//   const tx = new VersionedTransaction(message);
+//   console.log('Transaction Created..');
+
+//   // sign the transaction for all signers
+//   signers.forEach((signer) => tx.sign([signer]));
+
+//   return tx;
+// };
 
 interface ExplorerUrl {
   address?: string;
@@ -157,4 +152,36 @@ export const base64ToUint8Array = (base64: string) => {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
+};
+
+export const getMintToken = () => {
+  const savedMints: object = {};
+  const readData = fs.readFileSync('./mint_tokens.json', {
+    encoding: 'utf-8'
+  });
+
+  if (readData.startsWith('{') && readData.endsWith('}')) {
+    if (savedMints['tokenMint']) {
+      return savedMints['tokenMint'];
+    }
+  }
+
+  return null;
+};
+
+export const saveMintToken = ({ token }: { token: string }) => {
+  const readData = fs.readFileSync('./mint_tokens.json', { encoding: 'utf-8' });
+  let jsonData: object = {};
+  if (readData.startsWith('{') && readData.endsWith('}')) {
+    // parse the data
+    console.log('Got here');
+    jsonData = JSON.parse(readData);
+  }
+
+  jsonData['tokenMint'] = token;
+
+  // write back to the file
+  fs.writeFileSync('./mint_tokens.json', JSON.stringify(jsonData), {
+    encoding: 'utf-8'
+  });
 };
