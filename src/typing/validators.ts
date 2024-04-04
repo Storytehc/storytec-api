@@ -21,3 +21,11 @@ export class UriGeneratorParams {
   @IsNumber()
   percentOwnership?: number;
 }
+
+export class MintTokenParams {
+  @IsString()
+  token: string;
+
+  @IsNumber()
+  amountToMint: number;
+}

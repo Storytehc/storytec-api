@@ -1,7 +1,7 @@
 import {
   createSignerFromKeypair,
-  percentAmount,
-  sol
+  percentAmount
+  // sol
 } from '@metaplex-foundation/umi';
 import { payer, umi } from '../lib/variables';
 import { UriGeneratorParams } from 'src/typing/validators';
@@ -21,13 +21,13 @@ export const createNewTokenOnBlockchain = async (
   uriParams: UriGeneratorParams
 ) => {
   // request for airdrop if there isn't enough money
-  const balance = await umi.rpc.getBalance(payer.publicKey);
-  console.log(balance);
+  // const balance = await umi.rpc.getBalance(payer.publicKey);
+  // console.log(balance);
 
-  if (balance <= sol(1)) {
-    // request for airdrop
-    await umi.rpc.airdrop(payer.publicKey, sol(2));
-  }
+  // if (balance <= sol(1)) {
+  //   // request for airdrop
+  //   await umi.rpc.airdrop(payer.publicKey, sol(2));
+  // }
 
   // if no airdrop is needed, continue
   const mintKeypair = umi.eddsa.generateKeypair();
@@ -40,7 +40,8 @@ export const createNewTokenOnBlockchain = async (
     name: uriParams.name,
     uri: await generateUri(uriParams),
     sellerFeeBasisPoints: percentAmount(uriParams.percentOwnership || 5.5),
-    tokenStandard: TokenStandard.Fungible
+    tokenStandard: TokenStandard.Fungible,
+    symbol: uriParams.symbol
   });
 
   await builder.sendAndConfirm(umi);

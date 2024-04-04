@@ -154,34 +154,6 @@ export const base64ToUint8Array = (base64: string) => {
   return bytes;
 };
 
-export const getMintToken = () => {
-  const savedMints: object = {};
-  const readData = fs.readFileSync('./mint_tokens.json', {
-    encoding: 'utf-8'
-  });
-
-  if (readData.startsWith('{') && readData.endsWith('}')) {
-    if (savedMints['tokenMint']) {
-      return savedMints['tokenMint'];
-    }
-  }
-
-  return null;
-};
-
 export const saveMintToken = ({ token }: { token: string }) => {
-  const readData = fs.readFileSync('./mint_tokens.json', { encoding: 'utf-8' });
-  let jsonData: object = {};
-  if (readData.startsWith('{') && readData.endsWith('}')) {
-    // parse the data
-    console.log('Got here');
-    jsonData = JSON.parse(readData);
-  }
-
-  jsonData['tokenMint'] = token;
-
-  // write back to the file
-  fs.writeFileSync('./mint_tokens.json', JSON.stringify(jsonData), {
-    encoding: 'utf-8'
-  });
+  fs.appendFileSync('./tokens', `${token}\n`, { encoding: 'utf-8' });
 };
